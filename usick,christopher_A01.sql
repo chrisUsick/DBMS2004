@@ -37,12 +37,12 @@ WHERE MovieID IN (
 -- Question 4
 SELECT Name AS "Movie Name", 
   RatingType AS "Rating", 
-  TO_CHAR(RentalAmount, '$99.99') AS "Current", 
+  TO_CHAR(RentalAmount, '$999.99') AS "Current", 
   TO_CHAR(RentalAmount * DECODE(TRIM(RatingType), 
                                   '14 Accompaniment', 1.25, 
                                   '18 Accompaniment', 1.15,
                                   'Adult', 1.1,
-                                  1.05), '$99.99') AS "New Rent"
+                                  1.05), '$999.99') AS "New Rent"
 FROM Movie NATURAL JOIN Rating
 ORDER BY RatingType, Name;
 
