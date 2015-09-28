@@ -1,0 +1,63 @@
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Mon Sep 28 13:40:34 2015
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   RentalAgreement.ctl
+Data File:      RentalAgreement.dat
+  Bad File:     RentalAgreement.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 0
+Errors allowed: 50
+Bind array:     64 rows, maximum of 256000 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table RENTALAGREEMENT, loaded from every logical record.
+Insert option in effect for this table: APPEND
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+AGREEMENTID                         FIRST     *   ,  O(') CHARACTER            
+CUSTID                               NEXT     *   ,  O(') CHARACTER            
+AGREEMENTDATE                        NEXT     *   ,  O(') CHARACTER            
+MOVIECOUNT                           NEXT     *   ,  O(') CHARACTER            
+DURATIONID                           NEXT     *   ,  O(') CHARACTER            
+
+Record 1: Rejected - Error on table RENTALAGREEMENT.
+ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
+
+Record 2: Rejected - Error on table RENTALAGREEMENT.
+ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
+
+Record 3: Rejected - Error on table RENTALAGREEMENT.
+ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
+
+Record 4: Rejected - Error on table RENTALAGREEMENT.
+ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
+
+
+Table RENTALAGREEMENT:
+  0 Rows successfully loaded.
+  4 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+
+Space allocated for bind array:                  82560 bytes(64 rows)
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          0
+Total logical records read:             4
+Total logical records rejected:         4
+Total logical records discarded:        0
+
+Run began on Mon Sep 28 13:40:34 2015
+Run ended on Mon Sep 28 13:40:34 2015
+
+Elapsed time was:     00:00:00.32
+CPU time was:         00:00:00.12
