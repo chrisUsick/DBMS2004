@@ -1,0 +1,14 @@
+CONN T118/T118@DBMSDBII;
+ALTER SESSION SET NLS_NUMERIC_CHARACTERS=".,";
+SET ECHO OFF;
+SET PAGESIZE 30;
+SET LINESIZE 135;
+SET FEEDBACK OFF;
+-- output the data to file.csv
+COMPUTE SUM LABEL 'total' OF RentalAmount ON REPORT
+BREAK ON REPORT
+column rentalamount format '$9999.99' heading 'paid'
+SELECT MovieID, Name, RentalAmount
+FROM Movie
+ORDER BY MovieID;
+EXIT;

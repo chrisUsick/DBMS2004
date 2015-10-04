@@ -1,5 +1,5 @@
 
-SQL*Loader: Release 11.2.0.1.0 - Production on Mon Sep 28 13:40:34 2015
+SQL*Loader: Release 11.2.0.1.0 - Production on Tue Sep 29 15:28:17 2015
 
 Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
 
@@ -28,22 +28,13 @@ AGREEMENTDATE                        NEXT     *   ,  O(') CHARACTER
 MOVIECOUNT                           NEXT     *   ,  O(') CHARACTER            
 DURATIONID                           NEXT     *   ,  O(') CHARACTER            
 
-Record 1: Rejected - Error on table RENTALAGREEMENT.
-ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
-
-Record 2: Rejected - Error on table RENTALAGREEMENT.
-ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
-
-Record 3: Rejected - Error on table RENTALAGREEMENT.
-ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
-
 Record 4: Rejected - Error on table RENTALAGREEMENT.
-ORA-00001: unique constraint (T118.PK_RENTALAGREEMENT) violated
+ORA-02291: integrity constraint (T118.FK_RENTALAGREEMENT_0) violated - parent key not found
 
 
 Table RENTALAGREEMENT:
-  0 Rows successfully loaded.
-  4 Rows not loaded due to data errors.
+  3 Rows successfully loaded.
+  1 Row not loaded due to data errors.
   0 Rows not loaded because all WHEN clauses were failed.
   0 Rows not loaded because all fields were null.
 
@@ -53,11 +44,11 @@ Read   buffer bytes: 1048576
 
 Total logical records skipped:          0
 Total logical records read:             4
-Total logical records rejected:         4
+Total logical records rejected:         1
 Total logical records discarded:        0
 
-Run began on Mon Sep 28 13:40:34 2015
-Run ended on Mon Sep 28 13:40:34 2015
+Run began on Tue Sep 29 15:28:17 2015
+Run ended on Tue Sep 29 15:28:17 2015
 
-Elapsed time was:     00:00:00.32
-CPU time was:         00:00:00.12
+Elapsed time was:     00:00:00.36
+CPU time was:         00:00:00.03

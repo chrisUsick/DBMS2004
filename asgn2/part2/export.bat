@@ -1,5 +1,4 @@
+REM delete the output file and execute the export script
 @echo off
 del file.csv
-sqlplus /nolog @exportRentalAgreement.sql
-sqlplus /nolog @exportMovieRented.sql
-sqlplus /nolog @exportMovie.sql
+sqlplus /nolog @export.sql 

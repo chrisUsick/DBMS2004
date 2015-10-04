@@ -1,0 +1,39 @@
+Customer ID:  933
+
+ Agreement First Name      Last Name       Date         Movie Name                                                      
+---------- --------------- --------------- ------------ -------------------------------------------------------         
+      Paid                                                                                                              
+----------                                                                                                              
+         7 Willie          Leake           2014-01-04   Phantom of the Opera                                            
+                                                                                                                        
+      2.41                                                                                                              
+                                                                                                                        
+        85 Willie          Leake           2014-02-05   Speed                                                           
+                                                                                                                        
+      3.69                                                                                                              
+                                                                                                                        
+        32 Willie          Leake           2014-01-19   Demolition Man                                                  
+                                                                                                                        
+      3.28                                                                                                              
+                                                                                                                        
+        39 Willie          Leake           2014-01-22   The Patriot                                                     
+                                                                                                                        
+       3.7                                                                                                              
+                                                                                                                        
+         7 Willie          Leake           2014-01-04   BraveHeart                                                      
+                                                                                                                        
+      4.27                                                                                                              
+                                                                                                                        
+        25 Willie          Leake           2014-01-15   Edward Scissorhands                                             
+                                                                                                                        
+      4.21                                                                                                              
+                                                                                                                        
+         7 Willie          Leake           2014-01-04   Tombstone                                                       
+
+ Agreement First Name      Last Name       Date         Movie Name                                                      
+---------- --------------- --------------- ------------ -------------------------------------------------------         
+      Paid                                                                                                              
+----------                                                                                                              
+                                                                                                                        
+      3.94                                                                                                              
+                                                                                                                        

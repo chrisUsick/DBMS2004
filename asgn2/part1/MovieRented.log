@@ -1,5 +1,5 @@
 
-SQL*Loader: Release 11.2.0.1.0 - Production on Mon Sep 28 13:40:35 2015
+SQL*Loader: Release 11.2.0.1.0 - Production on Tue Sep 29 15:28:18 2015
 
 Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
 
@@ -27,13 +27,16 @@ AGREEMENTID                          NEXT     *   ,  O(') CHARACTER
 RENTALAMOUNT                         NEXT     *   ,  O(') CHARACTER            
 PERCENTREDUCTIONAPPLIED              NEXT     *   ,  O(') CHARACTER            
 
+Record 5: Rejected - Error on table MOVIERENTED.
+ORA-02291: integrity constraint (T118.FK_MOVIESRENTED_0) violated - parent key not found
+
 Record 6: Rejected - Error on table MOVIERENTED.
 ORA-02291: integrity constraint (T118.FK_MOVIESRENTED_1) violated - parent key not found
 
 
 Table MOVIERENTED:
-  5 Rows successfully loaded.
-  1 Row not loaded due to data errors.
+  4 Rows successfully loaded.
+  2 Rows not loaded due to data errors.
   0 Rows not loaded because all WHEN clauses were failed.
   0 Rows not loaded because all fields were null.
 
@@ -43,11 +46,11 @@ Read   buffer bytes: 1048576
 
 Total logical records skipped:          0
 Total logical records read:             6
-Total logical records rejected:         1
+Total logical records rejected:         2
 Total logical records discarded:        0
 
-Run began on Mon Sep 28 13:40:35 2015
-Run ended on Mon Sep 28 13:40:35 2015
+Run began on Tue Sep 29 15:28:18 2015
+Run ended on Tue Sep 29 15:28:18 2015
 
-Elapsed time was:     00:00:00.47
-CPU time was:         00:00:00.14
+Elapsed time was:     00:00:00.36
+CPU time was:         00:00:00.03
