@@ -4,27 +4,34 @@ REM Assignment 3
 REM October 4, 2015
 REM DOS application for generating a report.
 
-@echo off
+@ECHO off
+
 :showMenu
 CLS
 ECHO JR Movie Rentals 
-echo
-ECHO 1. Generate Report
-ECHO 2. Exit
-echo
+ECHO
+ECHO   1. Generate Report
+ECHO   2. Exit
+ECHO
 
 SET /P menuChoice=Enter your choice: 
 IF '%menuChoice%'=='1' (
-	ECHO Report
+	REM create spool file location if doesn't exist
+	IF NOT EXIST C:\Users\Administrator\DBMSDBII\Reports\ (
+		MKDIR C:\Users\Administrator\DBMSDBII\Reports\
+	)
+	REM run sql
+	sqlplus /nolog @report.sql
+	PAUSE
 ) ELSE IF '%menuChoice%'=='2' (
-	exit
+	EXIT
 ) ELSE IF '%menuChoice%'=='' (
-	echo Error - No choice entered. Please choose an option displayed.
-	pause
+	ECHO Error - No choice entered. Please choose an option displayed.
+	PAUSE
 	GOTO showMenu
 ) ELSE (
-	echo Error - Invalid choice entered. Please choose a valid option.
-	pause
+	ECHO Error - Invalid choice entered. Please choose a valid option.
+	PAUSE
 	GOTO showMenu
 )
 GOTO showMenu
