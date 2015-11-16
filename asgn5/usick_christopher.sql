@@ -67,19 +67,19 @@ IDENTIFIED BY rpass;
 
 GRANT SELECT, INSERT, UPDATE, DELETE
 ON Customer
-TO t118_SalesManager_Role;
+TO t118_SaleManager_Role;
 
 GRANT SELECT, INSERT, UPDATE, DELETE
-ON RentaalAgreement
-TO t118_SalesManager_Role;
+ON RentalAgreement
+TO t118_SaleManager_Role;
 
 GRANT SELECT, INSERT, UPDATE, DELETE
 ON MovieRented
-TO t118_SalesManager_Role;
+TO t118_SaleManager_Role;
 
 GRANT SELECT, INSERT, UPDATE, DELETE
 ON Movie
-TO t118_SalesManager_Role;
+TO t118_SaleManager_Role;
 
 -- Q 8
 GRANT t118_SaleManager_Role, t118_Salesperson_Role
