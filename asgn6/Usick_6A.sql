@@ -9,7 +9,8 @@ AS
   
   CURSOR tables IS 
   SELECT table_name 
-  FROM User_Tables;
+  FROM User_Tables
+  ORDER BY table_name;
   
   wTable tables%ROWTYPE;
 BEGIN
@@ -39,7 +40,7 @@ BEGIN
 END;
 /
 
-EXEC Extract_Tables;
+EXEC EXTRACT_TABLES;
 
 CREATE OR REPLACE PROCEDURE Extract_Columns (
   iTableName IN VARCHAR2)
@@ -79,7 +80,7 @@ BEGIN
   CLOSE Cols;
 END;
 /
-exec extract_columns('ORDERS');
+
 CREATE OR REPLACE FUNCTION Run_On (
     iStartText IN VARCHAR2
   )
