@@ -1,3 +1,9 @@
+-- Chris Usick, 0274130
+-- Section 1
+-- Assignment 6
+-- Novemeber 16, 2015
+-- Define procedures for Extracting tables from database
+
 SET SERVEROUTPUT ON SIZE 10000 FORMAT TRUNCATED;
 -- Extract All tables in the schema 
 CREATE OR REPLACE PROCEDURE Extract_Tables
@@ -52,6 +58,7 @@ BEGIN
 			-- extract constraints
 			Extract_PK_Constraint(wTable.table_name);
 			Extract_Unique_Constraint(wTable.table_name);
+			Extract_Check_Constraint(wTable.table_name);
 			EXCEPTION
 				WHEN INVALID_COLUMN_TYPE THEN
 					DBMS_OUTPUT.PUT_LINE('==========================================================================');
@@ -76,7 +83,8 @@ BEGIN
 END;
 /
 exec extract_tables;
-exec extract_pk_constraint('PRODUCTS');
+exec extract_pk_constraint('ORDERS');
+
 -- Extract primary key constraint for a given table
 CREATE OR REPLACE PROCEDURE Extract_PK_Constraint (
   iTableName IN VARCHAR2)
@@ -84,12 +92,13 @@ AS
   wOutput VARCHAR2(200) := '';
 BEGIN
 	wOutput := Extract_Constraint(iTableName, 'P', 'PRIMARY KEY');
-	DBMS_OUTPUT.PUT_LINE(wOutput);
-	
+	IF LENGTH(wOutput) > 2 THEN 
+		DBMS_OUTPUT.PUT_LINE(wOutput);
+	END IF;
 END;
 /
 
-exec Extract_Unique_Constraint('PRODUCTS');
+exec Extract_Unique_Constraint('ORDERS');
 -- Extract unique constraint(s) for a given table
 CREATE OR REPLACE PROCEDURE Extract_Unique_Constraint (
   iTableName IN VARCHAR2)
@@ -97,78 +106,99 @@ AS
   wOutput VARCHAR2(200) := '';
 BEGIN
 	wOutput := Extract_Constraint(iTableName, 'U', 'UNIQUE');
-	DBMS_OUTPUT.PUT_LINE(wOutput);
-	
-END;
-/
-
--- Extract unique constraint(s) for a given table
-CREATE OR REPLACE PROCEDURE Extract_Check_Constraint (
-  iTableName IN VARCHAR2)
-AS
-	wConstraintName VARCHAR2(50);
-	wSearchCondition VARCHAR2(10000);
-	wOutput VARCHAR2(10000) := '';
-	wSearchCast VARCHAR2(10000);
-BEGIN
-	OPEN Consts;
-	LOOP 
-		FETCH Consts INTO wConstraintName, wSearchCondition;
-		EXIT WHEN Consts%NOTFOUND;
-		wSearchCondition := wSearchCondition;
-		wSearchCast := wSearchCondition || ' ';
-		
-		wOutput := wOutput || '  , CONSTRAINT ' || 
-							wConstraintName || CHR(10) || '       ' || 
-							iTypeText || ' (';
-		DBMS_OUTPUT.PUT_LINE(wSearchCast);
-	END LOOP;
+	IF LENGTH(wOutput) > 2 THEN 
+		DBMS_OUTPUT.PUT_LINE(wOutput);
+	END IF;
 	
 END;
 /
 
 exec Extract_Check_Constraint('PRODUCTS');
+-- Extract check constraint(s) for a given table
+CREATE OR REPLACE PROCEDURE Extract_Check_Constraint (
+  iTableName IN VARCHAR2)
+AS
+	-- cursor definition
+	CURSOR Consts IS 
+	SELECT Constraint_Name, Search_Condition
+	FROM User_Constraints
+	WHERE Table_Name = iTableName 
+	AND Constraint_Type = 'C'
+	AND Constraint_Name NOT LIKE 'SYS%';
+	
+	wConstraintName VARCHAR2(50);
+	wSearchCondition VARCHAR2(150);
+BEGIN
+	OPEN Consts;
+	LOOP 
+		-- have to use a manual cursor because I can't cast 
+		-- User_Constraints.Search_Condition to a VARCHAR2
+		FETCH Consts INTO wConstraintName, wSearchCondition;
+		EXIT WHEN Consts%NOTFOUND;
+		
+		-- output the constraints
+		DBMS_OUTPUT.PUT_LINE('  , CONSTRAINT ' || 
+							wConstraintName);
+		DBMS_OUTPUT.PUT_LINE('       ' || 'CHECK' || ' ('
+										|| wSearchCondition || ')');
+	END LOOP;
+	
+END;
+/
+
+/*  Generic function for extracting the constraint statements of 
+		specific type
+ *	@param iTableName 			Table to extract the constraint(s) from 
+ * 	@param iConstraintType	Type of constraint. Must be 'P' or 'U'
+ *  @param iTypeText 				Name of the constraint, i.e. 'PRIMARY KEY'
+ */
+ 
+exec extract_pk_constraint('ORDERS');
 CREATE OR REPLACE FUNCTION Extract_Constraint (
 	iTableName IN VARCHAR2, 
 	iConstraintType IN VARCHAR2, 
-	iTypeText IN VARCHAR2) RETURN VARCHAR2
+	iTypeText IN VARCHAR2) 
+RETURN VARCHAR2
 AS
-	wFirstColumn NUMBER(1) := 0;
+	wFirstColumn NUMBER(1) := 1;
 	wOutput VARCHAR2(10000) := '';
+	wConstraintFound NUMBER(1) := 0;
 BEGIN
+	-- loop through constraints
 	FOR wConst IN (
 		SELECT Constraint_Name
 		FROM User_Constraints
 		WHERE Table_Name = iTableName 
 		AND Constraint_Type = iConstraintType
 	) LOOP
-		
+		wConstraintFound := 1;
 		wOutput := wOutput || '  , CONSTRAINT ' || 
 							wConst.Constraint_Name || CHR(10) || '       ' || 
 							iTypeText || ' (';
-							
-		wFirstColumn := 0;
-		IF (iConstraintType = 'C') THEN 
-			wOutput := wOutput || ' '; --wSearchCondition;
-		ELSE
-			FOR wColumn IN (
-				SELECT Column_Name
-				FROM User_Cons_Columns
-				WHERE Table_Name = iTableName
-				AND Constraint_Name = wConst.Constraint_Name
-			) LOOP 
-				IF wFirstColumn = 0 THEN
-					wFirstColumn := 1;
-					wOutput := wOutput || wColumn.Column_Name;
-				ELSE 
-					wOutput := wOutput || ', ' || wColumn.Column_Name;
-				END IF;
-			END LOOP;
+		
+		-- reset the firstColumn flag to true
+		wFirstColumn := 1;
+		-- select all the columns belonging to the constraint
+		FOR wColumn IN (
+			SELECT Column_Name
+			FROM User_Cons_Columns
+			WHERE Table_Name = iTableName
+			AND Constraint_Name = wConst.Constraint_Name
+		) LOOP 
+			-- if is first column don't add a comma
+			IF wFirstColumn = 1 THEN
+				wFirstColumn := 0;
+				wOutput := wOutput || wColumn.Column_Name;
+			ELSE 
+				wOutput := wOutput || ', ' || wColumn.Column_Name;
+			END IF;
+		END LOOP;
 			
-		END IF;
+		-- add a closing parenthesis for the columns
 		wOutput := wOutput || ')' || CHR(10);
 	END LOOP;
 	
+	-- return the final output
 	RETURN SUBSTR(wOutput, 0, LENGTH(wOutput) - 1);
 END;
 /
@@ -277,7 +307,7 @@ CREATE OR REPLACE FUNCTION Run_On (
    RETURN VARCHAR2 
    AS return_val VARCHAR2(100);
 BEGIN 
-   SELECT '-- ' || iStartText || TO_CHAR(SYSDATE, 'Mon DD, YYYY "at" HH:MI')
+   SELECT '---- ' || iStartText || TO_CHAR(SYSDATE, 'Mon DD, YYYY "at" HH:MI')
    INTO return_val
    FROM Dual;
    RETURN(return_val); 

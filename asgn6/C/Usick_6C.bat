@@ -5,4 +5,4 @@ REM Novemeber 16, 2015
 REM Extract tables from database
 
 @ECHO off
-sqlplus /nolog @Usick_6B_Run.sql
+sqlplus /nolog @Usick_6C_Run.sql

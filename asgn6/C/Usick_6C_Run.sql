@@ -1,3 +1,9 @@
+-- Chris Usick, 0274130
+-- Section 1
+-- Assignment 6
+-- Novemeber 16, 2015
+-- Extract tables from database
+
 CONN T118/T118@DBMSDBII;
 SET ECHO OFF
 SET FEEDBACK OFF
