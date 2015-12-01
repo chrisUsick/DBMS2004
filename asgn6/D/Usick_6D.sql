@@ -76,6 +76,19 @@ BEGIN
   
   DBMS_OUTPUT.PUT_LINE(cBLANK || ' T A B L E  C R E A T E  C O M P L E T E D ');
   DBMS_OUTPUT.PUT_LINE(cBLANK);
+	DBMS_OUTPUT.PUT_LINE(cBLANK);
+	DBMS_OUTPUT.PUT_LINE(cBLANK || ' S T A R T I N G	 T A B L E  A L T E R');
+	DBMS_OUTPUT.PUT_LINE(cBLANK);
+	DBMS_OUTPUT.PUT_LINE('--');
+	DBMS_OUTPUT.PUT_LINE('--');
+	
+	-- show the alter table statements for FKs
+	FOR wTable IN Tables LOOP
+		Extract_FK_Constraint(wTable.table_name);
+	END LOOP;
+	DBMS_OUTPUT.PUT_LINE(cBLANK);
+	DBMS_OUTPUT.PUT_LINE(cBLANK || ' T A B L E  A L T E R  C O M P L E T E D');
+	DBMS_OUTPUT.PUT_LINE(cBLANK);
   DBMS_OUTPUT.PUT_LINE(cTITLE);
   DBMS_OUTPUT.PUT_LINE(Run_On('Run completed on '));
   
@@ -83,22 +96,88 @@ BEGIN
 END;
 /
 exec extract_tables;
-exec extract_pk_constraint('ORDERS');
-
--- Extract primary key constraint for a given table
-CREATE OR REPLACE PROCEDURE Extract_PK_Constraint (
-  iTableName IN VARCHAR2)
-AS
-  wOutput VARCHAR2(200) := '';
+EXEC Extract_FK_Constraint('ORDERDETAILS');
+/*
+ * Outputs the alter table statements to add Foreign keys for the table specified
+ * @param iTableName name of table
+ */
+CREATE OR REPLACE PROCEDURE Extract_FK_Constraint (
+	iTableName IN VARCHAR2)
+AS 
+	-- cursor
+	CURSOR Consts IS 
+	SELECT Constraint_Name, R_Constraint_Name, Delete_Rule
+	FROM User_Constraints
+	WHERE Table_Name = iTableName 
+	AND Constraint_Type = 'R'
+	AND Constraint_Name NOT LIKE 'SYS%';
+	
+	-- variables 
+	wConst Consts%ROWTYPE;
+	wPKTableName VARCHAR2(150);
+	wFKConstraintCount NUMBER(3);
+	wOutput VARCHAR2(3000);
 BEGIN
-	wOutput := Extract_Constraint(iTableName, 'P', 'PRIMARY KEY');
-	IF LENGTH(wOutput) > 2 THEN 
-		DBMS_OUTPUT.PUT_LINE(wOutput);
+	-- get the number of foreign keys on the table
+	SELECT COUNT(*) 
+	INTO wFKConstraintCount
+	FROM User_Constraints
+	WHERE Table_Name = iTableName 
+	AND Constraint_Type = 'R'
+	AND Constraint_Name NOT LIKE 'SYS%';
+	
+	-- if there is a foreign keys, continue
+	IF wFKConstraintCount > 0 THEN 
+		DBMS_OUTPUT.PUT_LINE('-- Start Alter of table ' || iTableName);
+		-- loop through foreign keys
+		FOR wConst IN Consts LOOP
+		
+			-- get the Parent table name
+			SELECT Table_Name 
+			INTO wPKTableName 
+			FROM User_Constraints 
+			WHERE Constraint_Name = wConst.R_Constraint_Name;
+			
+			DBMS_OUTPUT.PUT_LINE('ALTER TABLE ' || iTableName);
+			DBMS_OUTPUT.PUT_LINE('    ADD CONSTRAINT ' || wConst.Constraint_Name);
+			DBMS_OUTPUT.PUT_LINE('        FORGEIGN KEY (' || Get_Constraint_Columns(iTableName, wConst.Constraint_Name) || ')');
+			DBMS_OUTPUT.PUT_LINE('        REFERENCES ' || wPKTableName);
+			DBMS_OUTPUT.PUT_LINE('        ON DELETE ' || wConst.Delete_Rule || ';');
+			DBMS_OUTPUT.PUT_LINE('--');
+			
+		END LOOP;
+		
+		DBMS_OUTPUT.PUT_LINE('-- End of Alter Table ' || iTableName);
 	END IF;
 END;
 /
 
-exec Extract_Unique_Constraint('ORDERS');
+/* 
+ * Extract primary key constraint for a given table
+ * @param iTableName name of table
+ */
+CREATE OR REPLACE PROCEDURE Extract_PK_Constraint (
+  iTableName IN VARCHAR2)
+AS
+  wOutput VARCHAR2(200) := '';
+	NO_PK_DEFINED EXCEPTION;
+BEGIN
+	-- returns a string of constraints
+	wOutput := Extract_Constraint(iTableName, 'P', 'PRIMARY KEY');
+	
+	-- if length output > 2 then there are some constraints defined
+	IF LENGTH(wOutput) > 2 THEN 
+		DBMS_OUTPUT.PUT_LINE(wOutput);
+	ELSE
+		-- raise exception to be caught
+		RAISE NO_PK_DEFINED;
+	END IF;
+	EXCEPTION 
+		WHEN NO_PK_DEFINED THEN 
+			DBMS_OUTPUT.PUT_LINE('-- *** WARNING *** No Primary Key Defined');
+END;
+/
+
 -- Extract unique constraint(s) for a given table
 CREATE OR REPLACE PROCEDURE Extract_Unique_Constraint (
   iTableName IN VARCHAR2)
@@ -113,7 +192,6 @@ BEGIN
 END;
 /
 
-exec Extract_Check_Constraint('PRODUCTS');
 -- Extract check constraint(s) for a given table
 CREATE OR REPLACE PROCEDURE Extract_Check_Constraint (
   iTableName IN VARCHAR2)
@@ -152,8 +230,7 @@ END;
  * 	@param iConstraintType	Type of constraint. Must be 'P' or 'U'
  *  @param iTypeText 				Name of the constraint, i.e. 'PRIMARY KEY'
  */
- 
-exec extract_pk_constraint('ORDERS');
+exec extract_pk_constraint('ORDERDETAILS');
 CREATE OR REPLACE FUNCTION Extract_Constraint (
 	iTableName IN VARCHAR2, 
 	iConstraintType IN VARCHAR2, 
@@ -163,6 +240,7 @@ AS
 	wFirstColumn NUMBER(1) := 1;
 	wOutput VARCHAR2(10000) := '';
 	wConstraintFound NUMBER(1) := 0;
+	NO_PK_DEFINED EXCEPTION;
 BEGIN
 	-- loop through constraints
 	FOR wConst IN (
@@ -179,20 +257,7 @@ BEGIN
 		-- reset the firstColumn flag to true
 		wFirstColumn := 1;
 		-- select all the columns belonging to the constraint
-		FOR wColumn IN (
-			SELECT Column_Name
-			FROM User_Cons_Columns
-			WHERE Table_Name = iTableName
-			AND Constraint_Name = wConst.Constraint_Name
-		) LOOP 
-			-- if is first column don't add a comma
-			IF wFirstColumn = 1 THEN
-				wFirstColumn := 0;
-				wOutput := wOutput || wColumn.Column_Name;
-			ELSE 
-				wOutput := wOutput || ', ' || wColumn.Column_Name;
-			END IF;
-		END LOOP;
+		wOutput := wOutput || Get_Constraint_Columns(iTableName, wConst.Constraint_Name);
 			
 		-- add a closing parenthesis for the columns
 		wOutput := wOutput || ')' || CHR(10);
@@ -200,9 +265,43 @@ BEGIN
 	
 	-- return the final output
 	RETURN SUBSTR(wOutput, 0, LENGTH(wOutput) - 1);
+	
 END;
 /
 
+/*
+ * Extract the columns of a specific constraint
+ * @param iTableName 			name of table the constraint belongs to 
+ * @param iConstraintName	name of constraint 
+ * @return format: col1, col2
+ */
+CREATE OR REPLACE FUNCTION Get_Constraint_Columns (
+	iTableName IN VARCHAR2,
+	iConstraintName IN VARCHAR2
+)
+RETURN VARCHAR2 
+AS 
+	wOutput VARCHAR2(500);
+	wFirstColumn NUMBER(1) := 1;
+BEGIN
+	-- loop through constraints columns
+	FOR wColumn IN (
+		SELECT Column_Name
+		FROM User_Cons_Columns
+		WHERE Table_Name = iTableName
+		AND Constraint_Name = iConstraintName
+	) LOOP 
+		-- if is first column don't add a comma
+		IF wFirstColumn = 1 THEN
+			wFirstColumn := 0;
+			wOutput := wOutput || wColumn.Column_Name;
+		ELSE 
+			wOutput := wOutput || ', ' || wColumn.Column_Name;
+		END IF;
+	END LOOP;
+	RETURN wOutput;
+END;
+/
 -- Create and output all the drop tables statements for all tables in schema
 CREATE OR REPLACE PROCEDURE Drop_Tables 
 AS
