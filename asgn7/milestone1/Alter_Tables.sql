@@ -6,9 +6,9 @@
 -- Modify the JR Movie Rentals schema to accomodate renting eBooks
 
 -- DROP TABLE statements 
-DROP TABLE eBook;
-DROP TABLE BookAuthor;
 DROP TABLE BookRented;
+DROP TABLE BookAuthor;
+DROP TABLE eBook;
 
 -- Create tables 
 CREATE TABLE eBook (
@@ -16,7 +16,7 @@ CREATE TABLE eBook (
 	ISBN				CHAR(13),
 	Title				VARCHAR2(100) NOT NULL,
 	Publisher 	VARCHAR2(100) NOT NULL,
-	Published 	DATE 		
+	Published 	DATE, 		
 	NoOfPages		NUMBER(4,0),
 	RentalCost  NUMBER(5,2) 	NOT NULL,
 	CONSTRAINT eBookPK
@@ -36,48 +36,46 @@ CREATE TABLE BookAuthor (
 
 CREATE TABLE BookRented (
 	BookID 				NUMBER(5, 0) NOT NULL,
-	AgreementID 	NUMBER(5, 0) NOT NULL
+	AgreementID 	NUMBER(5, 0) NOT NULL,
 	RentalAmount	NUMBER(5, 2) NOT NULL,
-	RentalExpiry	DATE				 NOT NULL 	DEFAULT (SYSDATE + 7),
+	RentalExpiry	DATE				 NOT NULL,
 	CONSTRAINT BookRentedPK
 		PRIMARY KEY (BookID, AgreementID)
-)
+);
 
 -- Add foreign keys
 ALTER TABLE BookAuthor 
 	ADD CONSTRAINT CreatesFK
 		FOREIGN KEY (BookID)
-		REFERENCES eBook
-		ON DELETE CASCADE;
+		REFERENCES eBook;
 		
 ALTER TABLE BookAuthor
 	ADD CONSTRAINT ContributesFK 
 		FOREIGN KEY (ContributorID)
-		REFERENCES Contributor
-		ON DELETE CASCADE;
+		REFERENCES Contributor;
 		
 ALTER TABLE BookRented
 	ADD CONSTRAINT RentedFK 
 		FOREIGN KEY (BookID)
-		REFERENCES eBook 
-		ON DELETE CASCADE;
+		REFERENCES eBook;
 		
 ALTER TABLE BookRented
 	ADD CONSTRAINT RentsOutFK
 		FOREIGN KEY (AgreementID)
-		REFERENCES RentalAgreement
-		ON DELETE CASCADE;
+		REFERENCES RentalAgreement;
 		
 -- Modify RentalAgreement
 ALTER TABLE RentalAgreement
 	RENAME COLUMN MovieCount TO ItemCount;
 	
 ALTER TABLE RentalAgreement
-	ADD COLUMN RentalType 	CHAR(1) NOT NULL;
-	
+	ADD RentalType 	CHAR(1) DEFAULT ' ' NOT NULL;
+
+-- must make data valid before adding constraint
+UPDATE RentalAgreement
+	SET RentalType = 'M';
+
 ALTER TABLE RentalAgreement
 	ADD CONSTRAINT RentalTypeCheck 
 	CHECK (RentalType IN ('M', 'B'));
 	
-UPDATE RentalAgreement
-	SET RentalType = 'M';
